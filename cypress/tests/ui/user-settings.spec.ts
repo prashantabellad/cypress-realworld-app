@@ -17,6 +17,7 @@ describe("User Settings", function () {
     }
 
     cy.getBySel("sidenav-user-settings").click();
+    cy.getBySelLike("phoneNumber-input").should("be.visible").as("phone");
   });
 
   it("renders the user settings form", function () {
@@ -59,22 +60,24 @@ describe("User Settings", function () {
     cy.visualSnapshot("User Settings Form Errors and Submit Disabled");
   });
 
-  it("updates first name, last name, email and phone number", function () {
+  it.only("updates first name, last name, email and phone number", function () {
     cy.getBySelLike("firstName").clear().type("New First Name");
     cy.getBySelLike("lastName").clear().type("New Last Name");
     cy.getBySelLike("email").clear().type("email@email.com");
-    cy.getBySelLike("phoneNumber-input").clear().type("6155551212").blur();
+    cy.get("@phone").clear().type("6155551212").blur();
 
     cy.getBySelLike("submit").should("not.be.disabled");
     cy.getBySelLike("submit").click();
 
     cy.wait("@updateUser").its("response.statusCode").should("equal", 204);
+    cy.reload();
 
     if (isMobile()) {
       cy.getBySel("sidenav-toggle").click();
     }
 
     cy.getBySel("sidenav-user-full-name").should("contain", "New First Name");
+    cy.get("@phone").should("be.visible");
     cy.visualSnapshot("User Settings Update Profile");
   });
 });
